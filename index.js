@@ -177,7 +177,7 @@ ${ReactDOM.renderToString(allFiles)}
                 let headerValue = s3Headers[header];
 
                 if (header === 'content-type') {
-                    if (headerValue === 'application/octet-stream') {
+                    if (headerValue === 'application/octet-stream' || headerValue === 'binary/octet-stream') {
                         // If the content-type from S3 is the default "application/octet-stream",
                         // try and get a more accurate type based on the extension.
                         headerValue = mime.lookup(req.path);
