@@ -180,7 +180,7 @@ ${ReactDOM.renderToString(allFiles)}
                     if (headerValue === 'application/octet-stream' || headerValue === 'binary/octet-stream') {
                         // If the content-type from S3 is the default "application/octet-stream",
                         // try and get a more accurate type based on the extension.
-                        headerValue = mime.lookup(req.path);
+                        headerValue = mime.getType(req.path);
                     }
                 } else if (header === 'cache-control') {
                     if (options.overrideCacheControl) {
