@@ -47,10 +47,7 @@ const S3Proxy = (options) => {
         };
         s3.listObjectsV2(s3Params, (err, data) => {
             if (err) {
-                return next(Error.create('Could not read S3 keys', {
-                    prefix: s3Params.prefix,
-                    bucket: s3Params.bucket,
-                }, err));
+                return res.status(400).send("Could not read S3 keys:  ".concat(s3Params.prefix, " ").concat(s3Params.bucket));
             }
 
             // const keys = [];
