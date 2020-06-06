@@ -14,6 +14,7 @@ const reject = require('lodash.reject');
 const assign = require('lodash.assign');
 
 const debug = debug0('s3-proxy');
+
 // HTTP headers from the AWS request to forward along
 const awsForwardHeaders = ['content-type', 'last-modified', 'etag', 'cache-control'];
 
