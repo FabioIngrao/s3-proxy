@@ -5,6 +5,14 @@
 
 S3 proxy middleware for returning S3 objects Express apps. Useful for streaming media files and data files from S3 without having to configure web hosting on the entire origin bucket. You can explicitly override the cache headers of the underlying S3 objects.
 
+## Publish
+
+build lib/index:
+```
+npm run prepublish 
+```
+Then push to the repository
+
 ## Usage
 
 ~~~js
