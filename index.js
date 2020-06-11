@@ -115,7 +115,8 @@ ${ReactDOM.renderToString(allFiles)}
 
     const listKeys = (req, res, next) => {
         console.log('listKeys');
-        let folderPath = req.originalUrl.substr(req.baseUrl.length);
+        const decodedURL = decodeURIComponent(req.originalUrl);
+        let folderPath = decodedURL.substr(req.baseUrl.length);
         const parts = folderPath.split('/');
         if (parts.length < 3) {
             return res.status(400).send(`Invalid path: ${folderPath}`);
