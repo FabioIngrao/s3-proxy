@@ -1,6 +1,6 @@
 {
   "name": "s3-proxy",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Streaming http proxy Express middleware for fetching objects from S3",
   "main": "lib/index.js",
   "scripts": {
