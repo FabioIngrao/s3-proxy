@@ -1,3 +1,4 @@
+/* eslint-disable */
 import AWS from 'aws-sdk';
 import awsConfig from 'aws-config';
 import urljoin from 'url-join';
@@ -18,9 +19,24 @@ const debug = debug0('s3-proxy');
 // HTTP headers from the AWS request to forward along
 const awsForwardHeaders = ['content-type', 'last-modified', 'etag', 'cache-control'];
 
-const makeURL = (val, isFolder) => {
+const makeURL = (val, isFolder, path) => {
     const classNames = `icon ${isFolder ? 'dir' : 'file'}`;
-    return (<div className="container"><a className={classNames} href={val}>{val}</a></div>);
+    const s3path = path + val;
+
+    return (
+        <>
+            <div className="container">
+                <a className={classNames} href={val}>
+                    {val}
+                </a>
+                <span>{' '}</span>
+                <button className="btn" type="button" data-clipboard-text={s3path}>
+                    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fillRule="evenodd" clipRule="evenodd">
+                        <path d="M20 24h-20v-22h3c1.229 0 2.18-1.084 3-2h8c.82.916 1.771 2 3 2h3v9h-2v-7h-4l-2 2h-3.898l-2.102-2h-4v18h16v-5h2v7zm-10-4h-6v-1h6v1zm0-2h-6v-1h6v1zm6-5h8v2h-8v3l-5-4 5-4v3zm-6 3h-6v-1h6v1zm0-2h-6v-1h6v1zm0-2h-6v-1h6v1zm0-2h-6v-1h6v1zm-1-7c0 .552.448 1 1 1s1-.448 1-1-.448-1-1-1-1 .448-1 1z"/>
+                    </svg>
+                </button>
+            </div>
+        </>);
 };
 
 /* istanbul ignore next */
@@ -32,6 +48,20 @@ const S3Proxy = (options) => {
         res.set('Content-Type', 'text/html');
         res.send(`<html>
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js"></script>
+    <script>
+      function load() {
+        new ClipboardJS('.btn', {
+          target: function(trigger) {
+            if (trigger){
+              return trigger.nextElementSibling || trigger;
+            }
+            return document.getElementById('header');
+          }
+        });
+      }
+      window.onload = load;
+    </script>
     <style>
         div.container {
             height: 40px;
@@ -48,10 +78,17 @@ const S3Proxy = (options) => {
             background: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiB3aWR0aD0iNDgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiNmZmY7fS5jbHMtMntmaWxsOiNkMGQ3ZGY7fS5jbHMtM3tmaWxsOiM0NzRjNTQ7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZS8+PGcgZGF0YS1uYW1lPSIxLUZpbGUtRG9jdW1lbnQiIGlkPSJfMS1GaWxlLURvY3VtZW50Ij48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik00MywxNFY0M2E0LDQsMCwwLDEtNCw0SDlzLTQsMC00LTRWNUE0LDQsMCwwLDEsOSwxSDMwdjlhNCw0LDAsMCwwLDQsNFoiLz48cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik00MywxNEgzNGE0LDQsMCwwLDEtNC00VjFaIi8+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJNNDMuOTIyLDEzLjYxNWEuOTk0Ljk5NCwwLDAsMC0uMjE1LS4zMjJsLTEzLTEzQTEsMSwwLDAsMCwzMCwwSDlBNS4wMDYsNS4wMDYsMCwwLDAsNCw1VjQzYTQuODIxLDQuODIxLDAsMCwwLDUsNUgzOWE1LjAwNiw1LjAwNiwwLDAsMCw1LTVWMTRBLjk4OC45ODgsMCwwLDAsNDMuOTIyLDEzLjYxNVpNMzksNDZIOS4wMDVBMi44NTMsMi44NTMsMCwwLDEsNiw0M1Y1QTMsMywwLDAsMSw5LDJIMjkuNTg2bDExLDExSDM0YTMsMywwLDAsMS0zLTNWN2ExLDEsMCwwLDAtMiwwdjNhNS4wMDYsNS4wMDYsMCwwLDAsNSw1aDhWNDNBMywzLDAsMCwxLDM5LDQ2WiIvPjxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTM3LDI0SDExYTEsMSwwLDAsMCwwLDJIMzdhMSwxLDAsMCwwLDAtMloiLz48cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0zNywzMEgxMWExLDEsMCwwLDAsMCwySDM3YTEsMSwwLDAsMCwwLTJaIi8+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMzcsMzVIMzVhMSwxLDAsMCwwLDAsMmgyYTEsMSwwLDAsMCwwLTJaIi8+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMzEsMzVIMjlhMSwxLDAsMCwwLDAsMmgyYTEsMSwwLDAsMCwwLTJaIi8+PC9nPjwvc3ZnPg==") left top no-repeat;
             background-size: contain;
         }
+        button.btn {
+            background: transparent;
+            border: none;
+        }
+        svg {
+            margin-bottom: -4px;
+        }
     </style>
 </head>
 <body>
-<h1>Index of ${s3Params.Prefix}</h1>
+<h1 id="header">Index of ${s3Params.Prefix}</h1>
 <br/>
 ${ReactDOM.renderToString(allFolders)}
 ${ReactDOM.renderToString(allFiles)}
@@ -70,7 +107,8 @@ ${ReactDOM.renderToString(allFiles)}
             const files = [];
             const folders = {};
             console.log(`data: ${JSON.stringify(data)}`);
-            const createLinks = (list, isFolder) => list.map((elem) => makeURL(elem, isFolder));
+            const s3Path = `s3://${s3Params.Bucket}/${s3Params.Prefix}`;
+            const createLinks = (list, isFolder, path) => list.map((elem) => makeURL(elem, isFolder, path));
 
             map(data.Contents, 'Key').forEach((key) => {
                 // Chop off the prefix path
@@ -99,8 +137,8 @@ ${ReactDOM.renderToString(allFiles)}
             console.log(`Files: ${JSON.stringify(files)}`);
             console.log(`Folders: ${JSON.stringify(folders)}`);
 
-            allFolders.push(createLinks(Object.keys(folders), true));
-            allFiles.push(createLinks(files));
+            allFolders.push(createLinks(Object.keys(folders), true, s3Path));
+            allFiles.push(createLinks(files, false, s3Path));
             if (data.IsTruncated) {
                 // Set Marker to last returned key
                 s3Params.ContinuationToken = data.NextContinuationToken;
