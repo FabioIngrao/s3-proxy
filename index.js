@@ -48,7 +48,10 @@ const S3Proxy = (options) => {
         res.set('Content-Type', 'text/html');
         res.send(`<html>
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js"></script>
+    <script 
+       src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js"
+       integrity="sha384-8CYhPwYlLELodlcQV713V9ZikA3DlCVaXFDpjHfP8Z36gpddf/Vrt47XmKDsCttu"
+       crossorigin="anonymous"></script>
     <script>
       function load() {
         new ClipboardJS('.btn', {
