@@ -136,6 +136,7 @@ const makeURL = ({
 
 /* istanbul ignore next */
 const S3Proxy = (options) => {
+    options.correctClockSkew = true;
     const s3 = new AWS.S3(assign(awsConfig(options),
         pick(options, 'endpoint', 's3ForcePathStyle')));
 
